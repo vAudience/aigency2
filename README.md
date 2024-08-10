@@ -1,3 +1,4 @@
 # aigency2
 
-a multi-agent orchestration framework
+vaudience internal repo that manages key models and services for our ai-agent services
+
