@@ -20,3 +20,21 @@
 # Go workspace file
 go.work
 go.work.sum
+
+
+*.log
+
+.env
+
+logs/*
+
+tmp/*
+
+# delve debugger
+__debug*
+
+# vscode settings
+.vscode
+
+# prompting stuff
+__*.md
