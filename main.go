@@ -1,7 +1,7 @@
 package main
 
 //	@title			github.com/vaudience/aigency2
-//	@version		0.2.0
+//	@version		0.2.1
 //	@description	vaudience internal repo that manages key models and services for our ai-agent services
 //  @termsOfService  https://www.vaudience.ai/terms-of-use/
 
