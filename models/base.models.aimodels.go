@@ -1,5 +1,4 @@
-// base/base.models.aimodels.go
-package base
+package models
 
 import (
 	"errors"

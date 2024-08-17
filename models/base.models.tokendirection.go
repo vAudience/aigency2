@@ -1,4 +1,4 @@
-package base
+package models
 
 // define TokenDirection as enum
 type TokenDirection string //@name TokenDirection

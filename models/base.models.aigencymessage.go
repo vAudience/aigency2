@@ -1,5 +1,4 @@
-// base/base.models.aigencymessage.go
-package base
+package models
 
 import (
 	"math"

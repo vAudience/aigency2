@@ -1,5 +1,4 @@
-// base/base.models.agentteams.go
-package base
+package models
 
 import (
 	"errors"

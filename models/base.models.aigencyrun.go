@@ -1,5 +1,4 @@
-// base/base.models.aigencyrun.go
-package base
+package models
 
 import (
 	"strings"

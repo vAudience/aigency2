@@ -1,4 +1,4 @@
-package base
+package models
 
 type AdapterFileInfo struct {
 	Description string `json:"description"`
