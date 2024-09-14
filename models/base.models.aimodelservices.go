@@ -29,6 +29,11 @@ const (
 	HostingLocationANY     HostingLocation = "any"
 )
 
+type AIModelServiceWithModels struct {
+	Service *AIModelServiceObject `json:"service"`
+	Models  []*AIModel            `json:"models"`
+} //@name AIModelServiceWithModels
+
 type AIModelServiceWriteDto struct {
 	Name             *string                     `json:"name" validate:"required,min=1,max=255" writexs:"system,admin,owner" readxs:"*"`
 	Description      *string                     `json:"description" validate:"omitempty,max=1024" writexs:"system,admin,owner" readxs:"*"`
