@@ -42,7 +42,7 @@ type AgentTeamWriteDto struct {
 	SystemMessages          *[]string                       `json:"system_messages" validate:"omitempty,unique,dive,min=1,max=1024" writexs:"system,admin,owner" readxs:"system,admin,owner"`
 	SystemMessagesMode      *AgentTeamMessagesInjectionMode `json:"system_messages_mode" validate:"omitempty,oneof=append prepend replace" writexs:"system,admin,owner" readxs:"system,admin,owner"`
 	InitialUserMessages     *[]string                       `json:"initial_user_messages" validate:"unique,dive,min=1,max=1024" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	InitialUserMessagesMode AgentTeamMessagesInjectionMode  `json:"initial_user_messages_mode" validate:"oneof=append prepend replace" writexs:"system,admin,owner" readxs:"system,admin,owner"`
+	InitialUserMessagesMode *AgentTeamMessagesInjectionMode `json:"initial_user_messages_mode" validate:"oneof=append prepend replace" writexs:"system,admin,owner" readxs:"system,admin,owner"`
 	MetaData                *map[string]any                 `json:"meta_data" writexs:"system,admin,owner" readxs:"system,admin,owner"`
 } //@name AgentTeamWriteDto
 
