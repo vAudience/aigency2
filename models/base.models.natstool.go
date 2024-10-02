@@ -6,15 +6,19 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/nats-io/nats.go"
 	goopenai "github.com/sashabaranov/go-openai"
 	"github.com/spf13/viper"
 	nuts "github.com/vaudience/go-nuts"
 )
+
+var validate = validator.New()
 
 type OnToolJobFinishedCallback func(results JobResults)
 
@@ -80,16 +84,18 @@ func NewToolManager() *NatsToolManager {
 
 type NatsTool struct {
 	AIgentAdapter
-	Name           string              `json:"name"`
-	Description    string              `json:"description"`
-	Type           string              `json:"type"`
-	Parameters     []NatsToolParameter `json:"parameters"`
-	ResponseFormat []NatsToolParameter `json:"response_format"`
-	Version        string              `json:"version"`
-	LastAnnounce   time.Time           `json:"-"`
-	jobTopic       string              `json:"-"`
-	executor       ToolExecutor        `json:"-"`
-	natsClient     *nats.Conn          `json:"-"`
+	Name                string              `json:"name"`
+	Description         string              `json:"description"`
+	Type                string              `json:"type"`
+	IsPublic            bool                `json:"is_public"`
+	OwnerOrganizationID string              `json:"owner_organization_id"`
+	Parameters          []NatsToolParameter `json:"parameters"`
+	ResponseFormat      []NatsToolParameter `json:"response_format"`
+	Version             string              `json:"version"`
+	LastAnnounce        time.Time           `json:"-"`
+	jobTopic            string              `json:"-"`
+	executor            ToolExecutor        `json:"-"`
+	natsClient          *nats.Conn          `json:"-"`
 }
 
 func (tool *NatsTool) GetName() string {
@@ -108,7 +114,7 @@ func (tool *NatsTool) GetOpenAIFunctionParameters() (parameters OpenaiFunctionPa
 	}
 	for _, param := range tool.Parameters {
 		parameters.Properties[param.Name] = OpenaiFunctionParameter{
-			Type:        param.VarType,
+			Type:        param.VarType.String(),
 			Description: param.Description,
 			Enum:        param.Enum,
 		}
@@ -300,6 +306,57 @@ func (tool *NatsTool) MarshalJobUpdate(jobUpdate NatsToolJobUpdates) (jobUpdateJ
 	return jobUpdateJsonBytes
 }
 
+func (tool *NatsTool) GetParameter(name string) (param *NatsToolParameter, ok bool) {
+	for _, p := range tool.Parameters {
+		if p.Name == name {
+			return &p, true
+		}
+	}
+	return nil, false
+}
+
+func ValueMatchesParameterType(value any, paramType NatsToolParameterType) bool {
+	switch paramType {
+	case NatsToolParameterTypeString:
+		_, ok := value.(string)
+		return ok
+	case NatsToolParameterTypeNumber:
+		_, ok := value.(float64)
+		return ok
+	case NatsToolParameterTypeArray:
+		_, ok := value.([]any)
+		return ok
+	case NatsToolParameterTypeObject:
+		_, ok := value.(map[string]any)
+		return ok
+	default:
+		return false
+	}
+}
+
+// Summary ValidateParameters
+// Description Validate the input parameters against the tool's parameters
+// Param inputParameters map[string]any The input parameters to validate
+// Success valid bool true if the parameters are valid, false otherwise
+// Success filteredToToolParameters map[string]interface] The parameters that are valid AND defined for the tool - this is the filtered version of the inputParameters with anything undefined for the tool removed
+// Success err error An error if the parameters are invalid
+func (tool *NatsTool) ValidateParameters(inputParameters map[string]any) (valid bool, filteredToToolParameters map[string]interface{}, err error) {
+	filteredToToolParameters = make(map[string]interface{})
+	for _, param := range tool.Parameters {
+		input, ok := inputParameters[param.Name]
+		if param.Required && !ok {
+			return false, nil, fmt.Errorf("required parameter not found: %s", param.Name)
+		}
+		if ok {
+			if !ValueMatchesParameterType(input, param.VarType) {
+				return false, nil, fmt.Errorf("parameter %s is not of type %s", param.Name, param.VarType.String())
+			}
+			filteredToToolParameters[param.Name] = input
+		}
+	}
+	return true, filteredToToolParameters, nil
+}
+
 // TODO: implement this
 // func (tool *NatsTool) StopJobHandler(jobIDmsg *nats.Msg) {
 // 	jobID := string(jobIDmsg.Data)
@@ -316,16 +373,124 @@ func (tool *NatsTool) MarshalJobUpdate(jobUpdate NatsToolJobUpdates) (jobUpdateJ
 // 	tool.natsClient.Subscribe(topic, tool.StopJobHandler)
 // }
 
+type NatsToolParameterType string //@name NatsToolParameterType
+
+func (t NatsToolParameterType) String() string {
+	return string(t)
+}
+
+func IsValidNatsToolParameterType(t string) bool {
+	return nuts.StringSliceContains(IsValidNatsToolParameterTypes, t)
+}
+
+const (
+	NatsToolParameterTypeString  NatsToolParameterType = "string"
+	NatsToolParameterTypeNumber  NatsToolParameterType = "number"
+	NatsToolParameterTypeArray   NatsToolParameterType = "array"
+	NatsToolParameterTypeObject  NatsToolParameterType = "object"
+	NatsToolParameterTypeBoolean NatsToolParameterType = "bool"
+)
+
+var IsValidNatsToolParameterTypes = []string{"string", "number", "array", "object", "bool"}
+
 // NatsToolParameter represents a parameter of a tool
 type NatsToolParameter struct {
-	Name         string                                  `json:"name"`
-	Aliases      []string                                `json:"aliases"` // this is a list of aliases for the parameter-name since llms suck at being consistent
-	Description  string                                  `json:"description"`
-	VarType      string                                  `json:"var_type"`
-	Required     bool                                    `json:"required"`
-	Enum         []string                                `json:"enum"`
-	DefaultValue func(data AdapterExecutionData) any     `json:"-"`
-	Validate     func(value any) (valid bool, err error) `json:"-"` // this is a function to validate the parameter value
+	Name         string                `json:"name"`
+	Aliases      []string              `json:"aliases"` // this is a list of aliases for the parameter-name since llms suck at being consistent
+	Description  string                `json:"description"`
+	VarType      NatsToolParameterType `json:"var_type"`
+	Required     bool                  `json:"required"`
+	Enum         []string              `json:"enum"`
+	FixedValue   any                   `json:"fixed_value"`
+	DefaultValue any                   `json:"default_value"`
+	Validations  string                `json:"validations"`
+	val          any                   `json:"-"`
+} //@name NatsToolParameter
+
+func (param *NatsToolParameter) SetValue(value any) (newValue any, err error) {
+	// check if we have a fixed value and apply that and return
+	if param.FixedValue != nil {
+		value = param.FixedValue
+		param.val = value
+		return param.val, nil
+	}
+	if value == nil && param.DefaultValue != nil {
+		param.val = param.DefaultValue
+		return param.val, nil
+	}
+	if value == nil && !param.Required {
+		return nil, nil
+	}
+	err = param.ValidateValue(value)
+	if err != nil {
+		return nil, err
+	}
+	param.val = value
+	return param.val, nil
+}
+
+func (param *NatsToolParameter) GetValue() any {
+	return param.val
+}
+
+// Validate checks if a given value matches the parameter's expected type and validations
+func (param *NatsToolParameter) ValidateValue(value any) error {
+	// Check if the parameter is required and if the value is nil
+	if param.Required && value == nil {
+		return fmt.Errorf("parameter %s is required", param.Name)
+	}
+
+	// If value is nil and parameter is not required, skip further checks
+	if value == nil {
+		return nil
+	}
+
+	// Check type match
+	valueType := reflect.TypeOf(value).String()
+	if !param.isTypeMatching(valueType) {
+		return fmt.Errorf("parameter %s should be of type %s, but got %s", param.Name, param.VarType, valueType)
+	}
+
+	// Apply validations
+	if err := param.applyValidations(value); err != nil {
+		return fmt.Errorf("validation failed for parameter %s: %w", param.Name, err)
+	}
+
+	return nil
+}
+
+// isTypeMatching checks if the value type matches the expected NatsToolParameterType
+func (param *NatsToolParameter) isTypeMatching(actualType string) bool {
+	switch param.VarType {
+	case NatsToolParameterTypeString:
+		return actualType == "string"
+	case NatsToolParameterTypeNumber:
+		return actualType == "int" || actualType == "float64"
+	case NatsToolParameterTypeArray:
+		return strings.HasPrefix(actualType, "[]")
+	case NatsToolParameterTypeBoolean:
+		return actualType == "bool"
+	case NatsToolParameterTypeObject:
+		return actualType == "map[string]interface{}" || actualType == "map[string]any"
+	}
+	return false
+}
+
+// applyValidations applies the validation rules to the value
+func (param *NatsToolParameter) applyValidations(value any) error {
+	// Split the validation rules string into individual rules
+	rules := strings.Split(param.Validations, ",")
+
+	// Use reflection to create a temporary variable and set its value
+	val := reflect.ValueOf(value)
+	for _, rule := range rules {
+		// Use the global validator to validate the rule
+		if err := validate.Var(val.Interface(), rule); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // NatsToolJob represents a job for a tool
@@ -509,6 +674,18 @@ func (tm *NatsToolManager) GetToolNames() []string {
 	return names
 }
 
+func (tm *NatsToolManager) GetToolList(isPublic bool, ownerOrgID string) []NatsTool {
+	tm.safety.Lock()
+	defer tm.safety.Unlock()
+	tools := make([]NatsTool, 0, len(tm.tools))
+	for _, tool := range tm.tools {
+		if tool.IsPublic == isPublic || tool.OwnerOrganizationID == ownerOrgID {
+			tools = append(tools, *tool)
+		}
+	}
+	return tools
+}
+
 func (tm *NatsToolManager) HasTool(name string) bool {
 	tm.safety.Lock()
 	defer tm.safety.Unlock()
@@ -683,4 +860,38 @@ func (tm *NatsToolManager) ExecuteJob(executionData AdapterExecutionData) (job *
 	nuts.L.Infof("%s--==>> Job submitted with jobId(%s) runId(%s) thread(%s) mission(%s) for tool(%s)", logName, job.JobID, job.RunId, job.ThreadId, job.MissionId, job.ToolName)
 	err = tm.AddToolJob(job)
 	return job, err
+}
+
+func ValidateAndFilterParameters(parameterDefinitions []NatsToolParameter, incomingParameters map[string]any) (filteredValidParameters map[string]any, err error) {
+	filteredValidParameters = make(map[string]any)
+
+	for _, param := range parameterDefinitions {
+		allowedLowercaseAliases := []string{param.Name}
+		for _, alias := range param.Aliases {
+			allowedLowercaseAliases = append(allowedLowercaseAliases, strings.ToLower(alias))
+		}
+		// copy aliases to the "real" key
+		foundParam := false
+		for _, alias := range allowedLowercaseAliases {
+			if _, ok := incomingParameters[alias]; ok {
+				incomingParameters[param.Name] = incomingParameters[alias]
+				foundParam = true
+				break
+			}
+		}
+		if param.Required && !foundParam {
+			return filteredValidParameters, fmt.Errorf("required argument(%s) is missing", param.Name)
+		}
+		validVal, err := param.SetValue(incomingParameters[param.Name])
+		if err != nil || validVal == nil {
+			if param.Required {
+				return filteredValidParameters, fmt.Errorf("required argument(%s) is invalid", param.Name)
+			}
+			// we ignore invalid values for non-required params
+			continue
+		}
+		filteredValidParameters[param.Name] = validVal
+	}
+
+	return filteredValidParameters, nil
 }

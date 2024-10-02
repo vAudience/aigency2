@@ -1,3 +1,4 @@
+// models/base.models.aimodels.go
 package models
 
 import (
@@ -80,10 +81,10 @@ const (
 )
 
 type AIModelConstraint struct {
-	Direction AIModelConstraintDirection `json:"direction" writexs:"system" readxs:"*"`
-	Min       float64                    `json:"min" writexs:"system" readxs:"*"`
-	Max       float64                    `json:"max" writexs:"system" readxs:"*"`
-	Unit      AIModelMinMaxUnit          `json:"unit" writexs:"system" readxs:"*"`
+	Direction AIModelConstraintDirection `json:"direction" writexs:"system:struct,admin:struct" readxs:"*"`
+	Min       float64                    `json:"min" writexs:"system:struct,admin:struct" readxs:"*"`
+	Max       float64                    `json:"max" writexs:"system:struct,admin:struct" readxs:"*"`
+	Unit      AIModelMinMaxUnit          `json:"unit" writexs:"system:struct,admin:struct" readxs:"*"`
 } //@name AIModelConstraint
 
 /*  COST CALCULATION SYSTEM
@@ -138,17 +139,17 @@ func (feat *AIModelFeature) CreateUsedFeatures(capability AIModelCapability, cos
 
 // a ExecutionCostTemplate describes the cost calculation for a single, specific AIModelFeature
 type ExecutionCostTemplate struct {
-	Description       string          `json:"description" writexs:"system" readxs:"system,admin,orgadmin"`
-	CostUnit          AIModelCostUnit `json:"cost_unit" writexs:"system" readxs:"system,admin,orgadmin"`
-	CostPerUnitInEuro float64         `json:"cost_per_unit_in_euro" writexs:"system" readxs:"system,admin,orgadmin"`
+	Description       string          `json:"description" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct,org-admin:struct"`
+	CostUnit          AIModelCostUnit `json:"cost_unit" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct,org-admin:struct"`
+	CostPerUnitInEuro float64         `json:"cost_per_unit_in_euro" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct,org-admin:struct"`
 } //@name ExecutionCostTemplate
 
 // for each aimodel capability, there is a specific ExecutionCostTemplate and we use this and add usedUnits along with the resulting cost in euro
 type ExecutionUsageCost struct {
 	ExecutionCostTemplate
-	UsedUnits                 float64 `json:"used_units" writexs:"system" readxs:"system,admin,orgadmin"`
-	ResultingCostInEuro       float64 `json:"resulting_cost_in_euro" writexs:"system" readxs:"system,admin,orgadmin"`
-	ResultingSourceCostInEuro float64 `json:"-" writexs:"system" readxs:"system,superadmin"`
+	UsedUnits                 float64 `json:"used_units" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct,org-admin:struct"`
+	ResultingCostInEuro       float64 `json:"resulting_cost_in_euro" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct,org-admin:struct"`
+	ResultingSourceCostInEuro float64 `json:"-" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct"`
 } //@name ExecutionUsageCost
 
 func NewExecutionUsageCost(template *ExecutionCostTemplate, usedUnits float64, multiplier float64) *ExecutionUsageCost {
@@ -174,41 +175,45 @@ func NewExecutionUsageCost(template *ExecutionCostTemplate, usedUnits float64, m
 // -- DTOs and DB Models --
 
 type AIModelWriteDto struct {
-	Name                  *string              `json:"name" validate:"omitempty,min=1,max=255" writexs:"system,admin,owner" readxs:"*"`
-	Description           *string              `json:"description" validate:"omitempty,max=1024" writexs:"system,admin,owner" readxs:"*"`
-	DocumentationUrl      *string              `json:"documentation_url" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	ServiceID             *string              `json:"service_id" validate:"omitempty,min=1,max=64" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	ModelID               *string              `json:"model_id" validate:"omitempty,min=1,max=64" writexs:"system,admin,owner" readxs:"*"`
-	MaxInputTokens        *int                 `json:"max_input_tokens" validate:"gte=0" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	MaxOutputTokens       *int                 `json:"max_output_tokens" validate:"gte=0" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	Constraints           *[]AIModelConstraint `json:"constraints" writexs:"system,admin,owner" readxs:"*"`
-	Features              *[]AIModelFeature    `json:"features" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	ServiceHostLocations  *[]HostingLocation   `json:"service_host_locations" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	AcceptedFileMimetypes *[]string            `json:"accepted_file_mimetypes" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	Parameters            *map[string]any      `json:"parameters" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	IsPublic              *bool                `json:"is_public" writexs:"system,admin,owner" readxs:"system,admin,owner"`
+	Name                  *string              `json:"name" validate:"omitempty,min=1,max=255" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	Description           *string              `json:"description" validate:"omitempty,max=1024" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	DocumentationUrl      *string              `json:"documentation_url" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	ServiceID             *string              `json:"service_id" validate:"omitempty,min=1,max=64" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	ModelID               *string              `json:"model_id" validate:"omitempty,min=1,max=64" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	MaxInputTokens        *int                 `json:"max_input_tokens" validate:"gte=0" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	MaxOutputTokens       *int                 `json:"max_output_tokens" validate:"gte=0" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	Constraints           *[]AIModelConstraint `json:"constraints" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	Features              *[]AIModelFeature    `json:"features" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	ServiceHostLocations  *[]HostingLocation   `json:"service_host_locations" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	AcceptedFileMimetypes *[]string            `json:"accepted_file_mimetypes" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	Parameters            *map[string]any      `json:"parameters" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	ParameterDefinitions  *[]NatsToolParameter `json:"parameter_definitions" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	IsPublic              *bool                `json:"is_public" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	InternalId            *string              `json:"internal_id" validate:"omitempty" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
 } //@name AIModelWriteDto
 
 type AIModel struct {
-	ID                    string              `json:"id" validate:"required,min=1,max=64" writexs:"system" readxs:"system,admin,owner"`
-	Name                  string              `json:"name" validate:"required,min=1,max=255" writexs:"system,admin,owner" readxs:"*"`
-	Description           string              `json:"description" validate:"omitempty,max=1024" writexs:"system,admin,owner" readxs:"*"`
-	DocumentationUrl      string              `json:"documentation_url" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	ServiceID             string              `json:"service_id" validate:"required,min=1,max=64" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	ModelID               string              `json:"model_id" validate:"required,min=1,max=64" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	MaxInputTokens        int                 `json:"max_input_tokens" validate:"gte=0" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	MaxOutputTokens       int                 `json:"max_output_tokens" validate:"gte=0" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	Constraints           []AIModelConstraint `json:"constraints" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	Features              []AIModelFeature    `json:"features" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	ServiceHostLocations  []HostingLocation   `json:"service_host_locations" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	AcceptedFileMimetypes []string            `json:"accepted_file_mimetypes" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	Parameters            map[string]any      `json:"parameters" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	IsPublic              bool                `json:"is_public" writexs:"system,admin,owner" readxs:"system,admin,owner"`
-	OwnerId               string              `json:"owner_id" validate:"required,min=1,max=64" writexs:"system" readxs:"system,admin,owner"`
-	OwnerOrganizationId   string              `json:"owner_organization_id" validate:"required,min=1,max=64" writexs:"system" readxs:"system,admin,owner"`
-	CreatedAt             int64               `json:"created_at" writexs:"system" readxs:"system,admin,owner"`
-	UpdatedBy             string              `json:"updated_by" validate:"omitempty,min=1,max=64" writexs:"system" readxs:"system,admin,owner"`
-	UpdatedAt             int64               `json:"updated_at" writexs:"system" readxs:"system,admin,owner"`
+	ID                    string              `json:"id" validate:"required,min=1,max=64" writexs:"system:struct,admin:struct" readxs:"*"`
+	Name                  string              `json:"name" validate:"required,min=1,max=255" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	Description           string              `json:"description" validate:"omitempty,max=1024" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	DocumentationUrl      string              `json:"documentation_url" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	ServiceID             string              `json:"service_id" validate:"required,min=1,max=64" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	ModelID               string              `json:"model_id" validate:"required,min=1,max=64" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	MaxInputTokens        int                 `json:"max_input_tokens" validate:"gte=0" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	MaxOutputTokens       int                 `json:"max_output_tokens" validate:"gte=0" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	Constraints           []AIModelConstraint `json:"constraints" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	Features              []AIModelFeature    `json:"features" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	ServiceHostLocations  []HostingLocation   `json:"service_host_locations" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	AcceptedFileMimetypes []string            `json:"accepted_file_mimetypes" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	Parameters            map[string]any      `json:"parameters" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	ParameterDefinitions  []NatsToolParameter `json:"parameter_definitions" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	IsPublic              bool                `json:"is_public" writexs:"system:struct,admin:struct,owner:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	OwnerId               string              `json:"owner_id" validate:"required,min=1,max=64" writexs:"system:struct,admin:struct" readxs:"*"`
+	OwnerOrganizationId   string              `json:"owner_organization_id" validate:"required,min=1,max=64" writexs:"system:struct,admin:struct" readxs:"*"`
+	InternalId            string              `json:"internal_id" validate:"omitempty" writexs:"system:struct,admin:struct,owner:struct" readxs:"*"`
+	CreatedAt             int64               `json:"created_at" writexs:"system:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	UpdatedBy             string              `json:"updated_by" validate:"omitempty,min=1,max=64" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct,owner:struct"`
+	UpdatedAt             int64               `json:"updated_at" writexs:"system:struct" readxs:"system:struct,admin:struct,owner:struct"`
 } //@name AIModel
 
 func NewAIModel() *AIModel {
@@ -289,7 +294,7 @@ func CalculateCostForText2Text(aiModel *AIModel, toolCallsUsed int, inputTokenCo
 		featuresUsed = append(featuresUsed, usedFeats...)
 	}
 	if inputTokenCount > 0 {
-		usedFeats, err := aiModel.CalculateUsageCostsForFeature(AIModelCapabilityTextToText, AIModelCostUnitOutputPerMillionTokens, float64(inputTokenCount), costMultiplier)
+		usedFeats, err := aiModel.CalculateUsageCostsForFeature(AIModelCapabilityTextToText, AIModelCostUnitInputPerMillionTokens, float64(inputTokenCount), costMultiplier)
 		if err != nil {
 			nuts.L.Errorf("failed to calculate feature costs: %w", err)
 		}
@@ -302,6 +307,19 @@ func CalculateCostForText2Text(aiModel *AIModel, toolCallsUsed int, inputTokenCo
 			nuts.L.Errorf("failed to calculate feature costs: %w", err)
 		}
 		// nuts.L.Debugf("Used features for toolCallsUsed: %v", usedFeats)
+		featuresUsed = append(featuresUsed, usedFeats...)
+	}
+	return featuresUsed, nil
+}
+
+func CalculateCostForText2Image(aiModel *AIModel, numberOfImages int, costMultiplier float64) (featuresUsed []AIModelFeature, err error) {
+	nuts.L.Debugf("Calculating costs for AIModel(%s) with numberOfImages(%d)", aiModel.ID, numberOfImages)
+	if numberOfImages > 0 {
+		usedFeats, err := aiModel.CalculateUsageCostsForFeature(AIModelCapabilityTextToImage, AIModelCostUnitImageGenerationPerImage, float64(numberOfImages), costMultiplier)
+		if err != nil {
+			nuts.L.Errorf("failed to calculate feature costs: %w", err)
+		}
+		// nuts.L.Debugf("Used features for numberOfImages: %v", usedFeats)
 		featuresUsed = append(featuresUsed, usedFeats...)
 	}
 	return featuresUsed, nil
