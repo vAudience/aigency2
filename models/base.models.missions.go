@@ -29,40 +29,40 @@ type MissionInstructionsDto struct {
 } //@name MissionInstructionsDto
 
 type MissionIssueDto struct {
-	Description  string                  `json:"description" example:"Mission to find a fun fact about basketball"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	Instructions *MissionInstructionsDto `json:"instructions" example:"Tell me a fun fact about basketball"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
+	Description  string                  `json:"description" example:"Mission to find a fun fact about basketball"  writexs:"*" readxs:"*"`
+	Instructions *MissionInstructionsDto `json:"instructions" example:"Tell me a fun fact about basketball"  writexs:"*" readxs:"*"`
 }
 
 type MissionResultsDto struct {
-	AgentTeamID  string           `json:"agent_team_id" example:"agteam_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	MissionID    string           `json:"mission_id" example:"mis_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	ExecutionID  string           `json:"execution_id" example:"exe_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	ChannelID    string           `json:"channel_id" example:"ch_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	InputText    string           `json:"input_text" example:"Tell me a fun fact about basketball"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	ResponseText string           `json:"response_text" example:"Basketball is the only major American sport with a clearly identifiable inventor. James Naismith wrote the sport’s original 13 rules as part of a December 1891 class assignment at a Young Men’s Christian Association (YMCA) training school in Springfield, Massachusetts."  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	ErrorMessage string           `json:"error_message" example:""  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	FinishReason string           `json:"finish_reason" example:"Mission completed successfully"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	InputTokens  int              `json:"input_tokens" writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	OutputTokens int              `json:"output_tokens" writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	Timestamp    int64            `json:"timestamp" example:"1620000000000"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	TimeNeeded   int64            `json:"time_needed" example:"1620000000000"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	FeaturesUsed []AIModelFeature `json:"features_used" writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
+	AgentTeamID  string           `json:"agent_team_id" example:"agteam_1234567890123456"  writexs:"*" readxs:"*"`
+	MissionID    string           `json:"mission_id" example:"mis_1234567890123456"  writexs:"*" readxs:"*"`
+	ExecutionID  string           `json:"execution_id" example:"exe_1234567890123456"  writexs:"*" readxs:"*"`
+	ChannelID    string           `json:"channel_id" example:"ch_1234567890123456"  writexs:"*" readxs:"*"`
+	InputText    string           `json:"input_text" example:"Tell me a fun fact about basketball"  writexs:"*" readxs:"*"`
+	ResponseText string           `json:"response_text" example:"Basketball is the only major American sport with a clearly identifiable inventor. James Naismith wrote the sport’s original 13 rules as part of a December 1891 class assignment at a Young Men’s Christian Association (YMCA) training school in Springfield, Massachusetts."  writexs:"*" readxs:"*"`
+	ErrorMessage string           `json:"error_message" example:""  writexs:"*" readxs:"*"`
+	FinishReason string           `json:"finish_reason" example:"Mission completed successfully"  writexs:"*" readxs:"*"`
+	InputTokens  int              `json:"input_tokens" writexs:"*" readxs:"*"`
+	OutputTokens int              `json:"output_tokens" writexs:"*" readxs:"*"`
+	Timestamp    int64            `json:"timestamp" example:"1620000000000"  writexs:"*" readxs:"*"`
+	TimeNeeded   int64            `json:"time_needed" example:"1620000000000"  writexs:"*" readxs:"*"`
+	FeaturesUsed []AIModelFeature `json:"features_used" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct"`
 } //@name MissionResultsDto
 
 type Mission struct {
-	ID                  string                   `json:"id" example:"mis_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	OwnerOrganizationID string                   `json:"owner_organization_id" example:"org_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	OwnerID             string                   `json:"owner_id" example:"usr_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	CreatorName         string                   `json:"creator_name" example:"John Doe"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	MissionTeamID       string                   `json:"mission_team_id" example:"agteam_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	Content             *AIgencyMessageList      `json:"content"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	Description         string                   `json:"description" example:"Mission to find a fun fact about basketball"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	StatusUpdates       *MissionStatusUpdateList `json:"status_updates" writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	CreatedAt           int64                    `json:"created_at" example:"1620000000000"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	CreatedBy           string                   `json:"created_by" example:"usr_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	UpdateAt            int64                    `json:"updated_at" example:"1620000000000"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	CompletedAt         int64                    `json:"completed_at" example:"1620000000000"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	CompletionReson     string                   `json:"completion_reason" example:"Mission completed successfully"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
+	ID                  string                   `json:"id" example:"mis_1234567890123456"  writexs:"*" readxs:"*"`
+	OwnerOrganizationID string                   `json:"owner_organization_id" example:"org_1234567890123456"  writexs:"*" readxs:"*"`
+	OwnerID             string                   `json:"owner_id" example:"usr_1234567890123456"  writexs:"*" readxs:"*"`
+	CreatorName         string                   `json:"creator_name" example:"John Doe"  writexs:"*" readxs:"*"`
+	MissionTeamID       string                   `json:"mission_team_id" example:"agteam_1234567890123456"  writexs:"*" readxs:"*"`
+	Content             *AIgencyMessageList      `json:"content"  writexs:"*" readxs:"*"`
+	Description         string                   `json:"description" example:"Mission to find a fun fact about basketball"  writexs:"*" readxs:"*"`
+	StatusUpdates       *MissionStatusUpdateList `json:"status_updates" writexs:"*" readxs:"*"`
+	CreatedAt           int64                    `json:"created_at" example:"1620000000000"  writexs:"*" readxs:"*"`
+	CreatedBy           string                   `json:"created_by" example:"usr_1234567890123456"  writexs:"*" readxs:"*"`
+	UpdateAt            int64                    `json:"updated_at" example:"1620000000000"  writexs:"*" readxs:"*"`
+	CompletedAt         int64                    `json:"completed_at" example:"1620000000000"  writexs:"*" readxs:"*"`
+	CompletionReson     string                   `json:"completion_reason" example:"Mission completed successfully"  writexs:"*" readxs:"*"`
 } //@name Mission
 
 func NewMission() *Mission {
@@ -114,16 +114,16 @@ const (
 )
 
 type MissionStatusUpdate struct {
-	ID          string        `json:"id" example:"msu_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	MissionID   string        `json:"mission_id" example:"mis_1234567890123456"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	Status      MissionStatus `json:"status" writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	Description string        `json:"description" example:"Mission started"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
-	Timestamp   int64         `json:"timestamp" example:"1620000000000"  writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
+	ID          string        `json:"id" example:"msu_1234567890123456"  writexs:"*" readxs:"*"`
+	MissionID   string        `json:"mission_id" example:"mis_1234567890123456"  writexs:"*" readxs:"*"`
+	Status      MissionStatus `json:"status" writexs:"*" readxs:"*"`
+	Description string        `json:"description" example:"Mission started"  writexs:"*" readxs:"*"`
+	Timestamp   int64         `json:"timestamp" example:"1620000000000"  writexs:"*" readxs:"*"`
 } //@name MissionStatusUpdate
 
 type MissionStatusUpdateList struct {
 	safety        sync.Mutex
-	StatusUpdates []*MissionStatusUpdate `json:"status_updates" writexs:"system,admin,org,user" readxs:"system,admin,org,user"`
+	StatusUpdates []*MissionStatusUpdate `json:"status_updates" writexs:"*" readxs:"*"`
 } //@name MissionStatusUpdateList
 
 func NewMissionStatusUpdateList() *MissionStatusUpdateList {
