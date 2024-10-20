@@ -34,19 +34,19 @@ type MissionIssueDto struct {
 }
 
 type MissionResultsDto struct {
-	AgentTeamID  string           `json:"agent_team_id" example:"agteam_1234567890123456"  writexs:"*" readxs:"*"`
-	MissionID    string           `json:"mission_id" example:"mis_1234567890123456"  writexs:"*" readxs:"*"`
-	ExecutionID  string           `json:"execution_id" example:"exe_1234567890123456"  writexs:"*" readxs:"*"`
-	ChannelID    string           `json:"channel_id" example:"ch_1234567890123456"  writexs:"*" readxs:"*"`
-	InputText    string           `json:"input_text" example:"Tell me a fun fact about basketball"  writexs:"*" readxs:"*"`
-	ResponseText string           `json:"response_text" example:"Basketball is the only major American sport with a clearly identifiable inventor. James Naismith wrote the sport’s original 13 rules as part of a December 1891 class assignment at a Young Men’s Christian Association (YMCA) training school in Springfield, Massachusetts."  writexs:"*" readxs:"*"`
-	ErrorMessage string           `json:"error_message" example:""  writexs:"*" readxs:"*"`
-	FinishReason string           `json:"finish_reason" example:"Mission completed successfully"  writexs:"*" readxs:"*"`
-	InputTokens  int              `json:"input_tokens" writexs:"*" readxs:"*"`
-	OutputTokens int              `json:"output_tokens" writexs:"*" readxs:"*"`
-	Timestamp    int64            `json:"timestamp" example:"1620000000000"  writexs:"*" readxs:"*"`
-	TimeNeeded   int64            `json:"time_needed" example:"1620000000000"  writexs:"*" readxs:"*"`
-	FeaturesUsed []AIModelFeature `json:"features_used" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct"`
+	MissionExecutorID string           `json:"mission_executor_id" example:"agteam_1234567890123456"  writexs:"*" readxs:"*"`
+	MissionID         string           `json:"mission_id" example:"mis_1234567890123456"  writexs:"*" readxs:"*"`
+	ExecutionID       string           `json:"execution_id" example:"exe_1234567890123456"  writexs:"*" readxs:"*"`
+	ChannelID         string           `json:"channel_id" example:"ch_1234567890123456"  writexs:"*" readxs:"*"`
+	InputText         string           `json:"input_text" example:"Tell me a fun fact about basketball"  writexs:"*" readxs:"*"`
+	ResponseText      string           `json:"response_text" example:"Basketball is the only major American sport with a clearly identifiable inventor. James Naismith wrote the sport’s original 13 rules as part of a December 1891 class assignment at a Young Men’s Christian Association (YMCA) training school in Springfield, Massachusetts."  writexs:"*" readxs:"*"`
+	ErrorMessage      string           `json:"error_message" example:""  writexs:"*" readxs:"*"`
+	FinishReason      string           `json:"finish_reason" example:"Mission completed successfully"  writexs:"*" readxs:"*"`
+	InputTokens       int              `json:"input_tokens" writexs:"*" readxs:"*"`
+	OutputTokens      int              `json:"output_tokens" writexs:"*" readxs:"*"`
+	Timestamp         int64            `json:"timestamp" example:"1620000000000"  writexs:"*" readxs:"*"`
+	TimeNeeded        int64            `json:"time_needed" example:"1620000000000"  writexs:"*" readxs:"*"`
+	FeaturesUsed      []AIModelFeature `json:"features_used" writexs:"system:struct,admin:struct" readxs:"system:struct,admin:struct"`
 } //@name MissionResultsDto
 
 type Mission struct {
@@ -54,7 +54,8 @@ type Mission struct {
 	OwnerOrganizationID string                   `json:"owner_organization_id" example:"org_1234567890123456"  writexs:"*" readxs:"*"`
 	OwnerID             string                   `json:"owner_id" example:"usr_1234567890123456"  writexs:"*" readxs:"*"`
 	CreatorName         string                   `json:"creator_name" example:"John Doe"  writexs:"*" readxs:"*"`
-	MissionTeamID       string                   `json:"mission_team_id" example:"agteam_1234567890123456"  writexs:"*" readxs:"*"`
+	MissionExecutorID   string                   `json:"mission_executor_id" example:"agteam_1234567890123456"  writexs:"*" readxs:"*"`
+	Instructions        *MissionInstructionsDto  `json:"instructions"  writexs:"*" readxs:"*"`
 	Content             *AIgencyMessageList      `json:"content"  writexs:"*" readxs:"*"`
 	Description         string                   `json:"description" example:"Mission to find a fun fact about basketball"  writexs:"*" readxs:"*"`
 	StatusUpdates       *MissionStatusUpdateList `json:"status_updates" writexs:"*" readxs:"*"`
